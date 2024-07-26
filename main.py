@@ -3,6 +3,7 @@ import sys
 import os
 import random
 import re
+import time
 
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
@@ -20,7 +21,7 @@ def testtings():
 
 # FUNCTION TO GET IMAGE's URL 
 def getImagesURL():
-    html_text = requests.get("https://unsplash.com/s/photos/race-car").text # Getting the website to scrape
+    html_text = requests.get("https://unsplash.com/").text # Getting the website to scrape
     soup = BeautifulSoup(html_text, "lxml") # Make a soup 
 
     photo_containers = soup.find('div', {'data-test': 'masonry-grid-count-three'}) # get the main container to scrape
@@ -52,6 +53,7 @@ def getImagesURL():
     print("grid yang dipilih: " + str(choose_random_grid + 1)) # EXPLANATION!!!!!!!!!
     print("Link yang dipilih: " +  f"({str(choose_random_link)}) https://unsplash.com" + str(links[choose_random_link]) ) # EXPLANATION !!!!!!!!!!!!!!!!!!!!
     
+    # time.sleep(10)
     getImage(chosen_link) # getting ready to get the image by the chosen link
 
 # FUNCTION TO GET THE ACTUAL IMAGE THE PAINTING THE ARTFUL THE PORTRAITS 
@@ -78,44 +80,48 @@ def getImage(link):
         get_img
     ]
     
-    prepImage(imgUrls)
-    # sendImage(get_img)
-    print("Gambar yang dikirim: "+get_img_small)
+    # prepImage(imgUrls)
+    sendImage(imgUrls)
+    # print("Gambar yang dikirim: "+get_img_small)
     
     # Unnecessary but good information
     with open('output.html', 'w', encoding='utf-8') as file: 
         file.write(str(get_img_small))
 
-def prepImage(urls):
+# Send message
+def sendImage(urls):
+    # os.system('cls')
     for url in urls:
         print(url)
-        print("=====++++++++================++++++++++++=============+++++++++++==============+++++++++++++")
-        # try: 
-        #     response = sendImage(url)
-        #     response_json = response.json()
-        #     if response_json.get("ok"): 
-        #         print(response_json)
-        #         break
-        #     else:
-        #         print(f"Failed to send photo with URL {url}: {response_json}")
-        # except Exception as e:
-        #     print(f"Error occurred with URL {url}: {e}")
+        
+        try: 
+            
+            base_url = os.getenv('telekey')
+            parameters = {
+                "chat_id" : "5757385822", 
+                # "photo" : "https://images.unsplash.com/photo-1721804978061-2c23db2b5e4c",
+                "photo" : str(url),
+                "caption" : "This is what you would look like if you were a picture"
+            }
 
-# Send message
-def sendImage(img): 
-    base_url = os.getenv('telekey')
-    parameters = {
-        "chat_id" : "5757385822", 
-        # "photo" : "https://images.unsplash.com/photo-1721804978061-2c23db2b5e4c",
-        "photo" : img,
-        "caption" : "This is what you would look like if you were a picture"
-    }
+            action = "sendPhoto"
 
-    action = "sendPhoto"
-
-    req = requests.get(base_url + action, data = parameters)
-    reponse = req.json()
-    print(reponse)
+            req = requests.get(base_url + action, data = parameters)
+            response = req.json()
+            if response.get("ok"): 
+                print(response)
+                print("Gambar yang dikirim: "+url)
+                break
+            else:
+                print(f"Failed to send photo with URL {response}")
+                os.system('cls')
+                
+            
+        except Exception as e: 
+            print("oh no day ruined")
+        
+        print("Gagal kirim foto \n=========+++++++++++++=============+++++++++++============+++++++++++==========++++++++++====++===++++++++++++++++++++++++++++++++=")
+        return getImagesURL()
 
 if __name__ == "__main__":
     getImagesURL()
